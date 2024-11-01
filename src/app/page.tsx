@@ -1,9 +1,9 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
-import { SignInButton, SignedIn, SignedOut, SignOutButton, useOrganization, useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
+import {  useOrganization, useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { UploadButton } from "./UploadButton";
+import { FileCard } from "./file-card";
 
 export default function Home() {
   const organization = useOrganization();
@@ -14,37 +14,20 @@ export default function Home() {
     orgId = organization.organization?.id ?? user.user?.id;
   }
 
-  const createFile = useMutation(api.files.createFile);
   const files = useQuery(api.files.getFiles, orgId ? {orgId} : "skip");
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-3">
-      <SignedIn>
-        <SignOutButton>
-          <Button>Sign Out</Button>
-        </SignOutButton>
-      </SignedIn>
-      <SignedOut>
-        <SignInButton mode='modal'>
-          <Button>Sign in</Button>
-        </SignInButton>
-      </SignedOut>
+    <main className="container mx-auto pt-12">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold">Your Files</h1>
+          <UploadButton />
+      </div>
 
-      {files?.map((file) => {
-        return <div key={file._id}>{file.name}</div>
-      })}
-
-      <Button
-        onClick={() => {
-          if(!orgId) return;
-          createFile({
-            name: "hellow world",
-            orgId: orgId
-          });
-        }}
-      >
-        Click me
-      </Button>
+      <div className="grid grid-cols-4 gap-4">
+        {files?.map((file) => {
+          return <FileCard key={file._id} file={file} />
+        })}
+      </div>  
     </main>
   );
 }

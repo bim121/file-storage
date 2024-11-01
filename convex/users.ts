@@ -2,6 +2,7 @@ import { internalMutation, MutationCtx, QueryCtx } from "./_generated/server";
 import { ConvexError, v } from 'convex/values'
 
 export async function getUser(ctx: QueryCtx | MutationCtx, tokenIdentifier: string){
+    console.log(tokenIdentifier)
     const user = await ctx.db 
         .query("users")
         .withIndex("by_tokenIdentifier", (q) => 
