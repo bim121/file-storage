@@ -69,7 +69,7 @@ export function FileCard({ file }: { file: Doc<"files"> }) {
                     { file.name } 
                 </CardTitle>
                 <div className='absolute top-2 right-1'>
-                    <FileCardActions />
+                    <FileCardActions file={file}/>
                 </div>
                 <CardDescription>Card Description</CardDescription>
             </CardHeader>
