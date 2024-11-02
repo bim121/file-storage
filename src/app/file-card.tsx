@@ -23,7 +23,7 @@ function FileCardActions({ file }: { file: Doc<"files"> }){
     return(
         <>
             <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                <AlertDialogTrigger>Open</AlertDialogTrigger>
+                <AlertDialogTrigger></AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
