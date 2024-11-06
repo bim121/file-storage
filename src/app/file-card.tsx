@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
     Card,
     CardContent,
@@ -7,16 +7,17 @@ import {
     CardHeader,
     CardTitle
 }from '../components/ui/card';
-import { Doc } from '../../convex/_generated/dataModel';
+import { Doc, Id } from '../../convex/_generated/dataModel';
 import { Button } from '../components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuItem } from '../components/ui/dropdown-menu';
-import { DeleteIcon, MoreVertical, TrashIcon } from 'lucide-react';
+import { DeleteIcon, FileTextIcon, GanttChartIcon, ImageIcon, MoreVertical, TrashIcon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '../hooks/use-toast';
+import Image from 'next/image';
 
-function FileCardActions({ file }: { file: Doc<"files"> }){
+function FileCardActions({ file }: { file: Doc<"files">}){
     const deleteFile = useMutation(api.files.deleteFile);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const { toast } = useToast();
@@ -61,20 +62,47 @@ function FileCardActions({ file }: { file: Doc<"files"> }){
     )
 }
 
-export function FileCard({ file }: { file: Doc<"files"> }) {
+export function FileCard({ file }: { file: Doc<"files">}) {
+    const typeIcons = {
+        "image": <ImageIcon />,
+        "pdf": <FileTextIcon />,
+        "csv": <GanttChartIcon />
+    } as Record<Doc<"files">["type"], ReactNode>;
+
+    const getFileUrl = useMutation(api.files.getUrl);
+
+    const [src, setSrc] = useState<string| null>(null);
+
+    useEffect(() => {
+        getFileUrl({ fileId: file.fileId }).then((url) => {
+            setSrc(url);
+        });
+    }, [file.fileId]);
+
+
     return (
         <Card>
             <CardHeader className='relative'>
-                <CardTitle>
+                <CardTitle className='flex gap-2'>
+                    <div className='flex justify-center'>{typeIcons[file.type]}</div>{" "}
                     { file.name } 
                 </CardTitle>
                 <div className='absolute top-2 right-1'>
                     <FileCardActions file={file}/>
                 </div>
-                <CardDescription>Card Description</CardDescription>
             </CardHeader>
-            <CardContent>
-                <p>Card Content</p>
+            <CardContent className='h-[200px] flex justify-center items-center'>
+                {file.type === "image" && src && (
+                    <Image alt={file.name} width="200" height="100" src={src}/>
+                )}
+
+                {file.type === "csv" && (
+                    <GanttChartIcon className='w-20 h-20'/>
+                )}
+
+                {file.type === "pdf" && (
+                    <FileTextIcon className='w-20 h-20'/>
+                )}
             </CardContent>
             <CardFooter>
                 <Button>Download</Button>

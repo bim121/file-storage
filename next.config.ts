@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        hostname: "limitless-dachshund-675.convex.cloud"
+      }
+    ]
+  }
 };
 
 export default nextConfig;
