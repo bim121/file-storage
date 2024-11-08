@@ -15,7 +15,7 @@ export const generateUploadUrl = mutation(async (ctx) => {
 
 export const getUrl = mutation({
     args: {
-        fileId: v.id("_storage"),
+        fileId: v.id("_storage")
     },
     async handler(ctx, args){
         const indentity = await ctx.auth.getUserIdentity();
@@ -83,7 +83,8 @@ export const createFile = mutation({
 
 export const getFiles = query({
     args: {
-        orgId: v.string()
+        orgId: v.string(),
+        query: v.optional(v.string()),
     },
     async handler(ctx, args){
         const indentity = await ctx.auth.getUserIdentity();
@@ -102,10 +103,18 @@ export const getFiles = query({
             throw [];
         }
 
-        return await ctx.db.
+        const files = await ctx.db.
             query("files")
             .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
             .collect();
+           
+        const query = args.query;    
+        
+        if(query){
+            return files.filter((file) => file.name.includes(query))  
+        } else {
+            return files 
+        }   
     }
 })
 

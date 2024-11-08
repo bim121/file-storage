@@ -104,8 +104,12 @@ export function FileCard({ file }: { file: Doc<"files">}) {
                     <FileTextIcon className='w-20 h-20'/>
                 )}
             </CardContent>
-            <CardFooter>
-                <Button>Download</Button>
+            <CardFooter className='flex justify-center'>
+                <Button
+                    onClick={() => {
+                        if(src) window.open(src, '_blank')
+                    }}
+                >Download</Button>
             </CardFooter>
         </Card>
     )
