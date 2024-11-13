@@ -2,15 +2,14 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import {
     Card,
     CardContent,
-    CardDescription,
     CardFooter,
     CardHeader,
     CardTitle
 }from '../components/ui/card';
-import { Doc, Id } from '../../convex/_generated/dataModel';
+import { Doc } from '../../convex/_generated/dataModel';
 import { Button } from '../components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuItem } from '../components/ui/dropdown-menu';
-import { DeleteIcon, FileTextIcon, GanttChartIcon, ImageIcon, MoreVertical, TrashIcon } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { FileTextIcon, GanttChartIcon, ImageIcon, MoreVertical, TrashIcon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useMutation } from 'convex/react';
 import { api } from '../../convex/_generated/api';

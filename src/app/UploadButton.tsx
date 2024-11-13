@@ -1,15 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SignInButton, SignedIn, SignedOut, SignOutButton, useOrganization, useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
+import { useOrganization, useUser } from "@clerk/nextjs";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -76,6 +76,7 @@ export function UploadButton() {
         description: "Now everyone can view your file, February 10, 2023 at 5:57 PM"
       })
     } catch(err){
+      console.error(err);
       toast({
         variant: "destructive",
         title: "Something went wrong",

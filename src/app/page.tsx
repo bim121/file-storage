@@ -48,10 +48,6 @@ export default function Home() {
         </div>
       )}
 
-      {!isLoading && !query && files.length === 0 && (
-         <Placeholder />
-      )}
-
       {!isLoading && (
         <>
           <div className="flex justify-between items-center mb-8">
