@@ -1,24 +1,19 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle
-}from '../components/ui/card';
-import { Doc } from '../../convex/_generated/dataModel';
-import { Button } from '../components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
-import { FileTextIcon, GanttChartIcon, ImageIcon, MoreVertical, TrashIcon } from 'lucide-react';
+import { FileTextIcon, GanttChartIcon, ImageIcon, MoreVertical, StarIcon, TrashIcon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useMutation } from 'convex/react';
-import { api } from '../../convex/_generated/api';
-import { useToast } from '../hooks/use-toast';
 import Image from 'next/image';
+import { Doc } from '../../../../convex/_generated/dataModel';
+import { useToast } from '@/hooks/use-toast';
+import { api } from '../../../../convex/_generated/api';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 function FileCardActions({ file }: { file: Doc<"files">}){
     const deleteFile = useMutation(api.files.deleteFile);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const toggleFavorite = useMutation(api.files.toggleFavorite);
     const { toast } = useToast();
     return(
         <>
@@ -49,11 +44,29 @@ function FileCardActions({ file }: { file: Doc<"files">}){
             </AlertDialog>
 
             <DropdownMenu>
-                <DropdownMenuTrigger><MoreVertical /></DropdownMenuTrigger>
+                <DropdownMenuTrigger>
+                    <MoreVertical />
+                </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuLabel className='flex gap-1 text-red-600 items-center cursor-pointer' onClick={() => setIsConfirmOpen(true)}>
+                    <DropdownMenuItem 
+                        className='flex gap-1 items-center cursor-pointer' 
+                        onClick={() => {
+                            toggleFavorite({
+                                fileId: file._id
+                            })
+                        }}
+                    >
+                        <StarIcon className='w-8 h-8' /> Favorite
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem 
+                        className='flex gap-1 text-red-600 items-center cursor-pointer' 
+                        onClick={() => setIsConfirmOpen(true)}
+                    >
                         <TrashIcon className='w-8 h-8' /> Delete
-                    </DropdownMenuLabel>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
