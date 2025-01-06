@@ -9,17 +9,17 @@ import { SearchBar } from "@/app/dashboard/_components/search-bar";
 import { UploadButton } from "./UploadButton";
 import { FileCard } from "./file-card";
 
-function Placeholder(){
+function Placeholder({favorites}:{favorites?: boolean}){
   return(<>
     <div className="flex flex-col gap-8 w-full items-center mt-24">
       <Image
         alt="an image of a picture and directory icon"
         width="300"
         height="300"
-        src="./empty.svg"
+        src="/empty.png"
       ></Image>
-      <div className="text-2xl">You have no files, upload one now</div>
-      <UploadButton />
+      <div className="text-2xl">{favorites ? "You have no favorites files" : "You have no files, upload one now"}</div>
+      {favorites ? <></> : <UploadButton />}
     </div>
   </>)
 }
@@ -36,10 +36,15 @@ export function FilesBrowser({
   const [query, setQuery] = useState("");
 
   let orgId: string | undefined = undefined;
-
+  
   if(organization.isLoaded && user.isLoaded){
     orgId = organization.organization?.id ?? user.user?.id;
   }
+
+  const favoritesFiles = useQuery(
+    api.files.getAllFavorites, 
+    orgId ? {orgId} : "skip"
+  );
 
   const files = useQuery(
     api.files.getFiles, 
@@ -68,13 +73,13 @@ export function FilesBrowser({
               </div>
 
               {files.length === 0 && (
-                <Placeholder />
+                <Placeholder favorites={favorites}/>
               )}
 
               <div>
                 <div className="grid grid-cols-4 gap-4">
                   {files?.map((file) => {
-                    return <FileCard key={file._id} file={file} />
+                    return <FileCard key={file._id} file={file} favorites={favoritesFiles ?? []}/>
                   })}
                 </div>
               </div>
