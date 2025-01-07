@@ -9,6 +9,7 @@ import { api } from '../../../../convex/_generated/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Protect } from '@clerk/nextjs';
 
 function FileCardActions({ 
     file, 
@@ -76,14 +77,18 @@ function FileCardActions({
                         }
                     </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem 
-                        className='flex gap-1 text-red-600 items-center cursor-pointer' 
-                        onClick={() => setIsConfirmOpen(true)}
+                    <Protect
+                        role="org:admin"
+                        fallback={<></>}
                     >
-                        <TrashIcon className='w-8 h-8' /> Delete
-                    </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                            className='flex gap-1 text-red-600 items-center cursor-pointer' 
+                            onClick={() => setIsConfirmOpen(true)}
+                        >
+                            <TrashIcon className='w-8 h-8' /> Delete
+                        </DropdownMenuItem>
+                    </Protect>
                 </DropdownMenuContent>
             </DropdownMenu>
 
@@ -105,9 +110,6 @@ export function FileCard({
     } as Record<Doc<"files">["type"], ReactNode>;
 
     const isFavorited = favorites.some((favorite) => favorite.fileId === file._id);
-
-    console.log(favorites)
-    console.log(file._id)
 
     const getFileUrl = useMutation(api.files.getUrl);
 
