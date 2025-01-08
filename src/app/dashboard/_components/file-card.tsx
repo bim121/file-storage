@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import { FileTextIcon, GanttChartIcon, ImageIcon, MoreVertical, StarHalf, StarIcon, TrashIcon } from 'lucide-react';
+import { FileTextIcon, GanttChartIcon, ImageIcon, MoreVertical, StarHalf, StarIcon, TrashIcon, UndoIcon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useMutation } from 'convex/react';
 import Image from 'next/image';
@@ -19,6 +19,7 @@ function FileCardActions({
     isFavorited: boolean
 }){
     const deleteFile = useMutation(api.files.deleteFile);
+    const restoreFile = useMutation(api.files.restoreFile);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const toggleFavorite = useMutation(api.files.toggleFavorite);
     const { toast } = useToast();
@@ -30,8 +31,7 @@ function FileCardActions({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your 
-                            account and remove your data from our servers.
+                            This action will mark the file for out deletion process. Files are deleted peridiocaly
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -42,8 +42,8 @@ function FileCardActions({
                             });
                             toast({
                                 variant: "success",
-                                title: "File delete",
-                                description: "Your file is now gone from the system"
+                                title: "File marked for deletion",
+                                description: "Your file will be deleted soon"
                             })
                         }}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
@@ -84,9 +84,26 @@ function FileCardActions({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
                             className='flex gap-1 text-red-600 items-center cursor-pointer' 
-                            onClick={() => setIsConfirmOpen(true)}
+                            onClick={() => {
+                                if(file.shouldDelete){
+                                    restoreFile({
+                                        fileId: file._id
+                                    })
+                                }else{
+                                    setIsConfirmOpen(true)
+                                }
+                            }}
                         >
-                            <TrashIcon className='w-8 h-8' /> Delete
+                            {file.shouldDelete ? (
+                                    <div className='flex gap-1 text-green-600 items-center cursor-pointer'>
+                                        <UndoIcon className='w-4 h-4'/> Restore
+                                    </div> 
+                                ) : (
+                                    <div className='flex gap-1 text-red-600 items-center cursor-pointer'>
+                                        <TrashIcon className='w-4 h-4'/> Delete
+                                    </div>
+                                )
+                            }
                         </DropdownMenuItem>
                     </Protect>
                 </DropdownMenuContent>

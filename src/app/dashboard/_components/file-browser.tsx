@@ -9,7 +9,13 @@ import { SearchBar } from "@/app/dashboard/_components/search-bar";
 import { UploadButton } from "./UploadButton";
 import { FileCard } from "./file-card";
 
-function Placeholder({favorites}:{favorites?: boolean}){
+function Placeholder({
+  favorites,
+  deletedOnly
+}:{
+  favorites?: boolean,
+  deletedOnly?: boolean
+}){
   return(<>
     <div className="flex flex-col gap-8 w-full items-center mt-24">
       <Image
@@ -19,17 +25,19 @@ function Placeholder({favorites}:{favorites?: boolean}){
         src="/empty.png"
       ></Image>
       <div className="text-2xl">{favorites ? "You have no favorites files" : "You have no files, upload one now"}</div>
-      {favorites ? <></> : <UploadButton />}
+      {favorites || deletedOnly ? <></> : <UploadButton />}
     </div>
   </>)
 }
 
 export function FilesBrowser({
   title,
-  favorites
+  favorites,
+  deletedOnly
 }: {
   title: string,
-  favorites?: boolean
+  favorites?: boolean,
+  deletedOnly?: boolean
 }) {
   const organization = useOrganization();
   const user = useUser();
@@ -48,7 +56,7 @@ export function FilesBrowser({
 
   const files = useQuery(
     api.files.getFiles, 
-    orgId ? {orgId, query, favorites} : "skip"
+    orgId ? {orgId, query, favorites, deletedOnly} : "skip"
   );
 
   const isLoading = files === undefined;
@@ -73,7 +81,7 @@ export function FilesBrowser({
               </div>
 
               {files.length === 0 && (
-                <Placeholder favorites={favorites}/>
+                <Placeholder favorites={favorites} deletedOnly={deletedOnly}/>
               )}
 
               <div>
