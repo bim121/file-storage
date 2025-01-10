@@ -8,6 +8,8 @@ import { api } from "../../../../convex/_generated/api";
 import { SearchBar } from "@/app/dashboard/_components/search-bar";
 import { UploadButton } from "./UploadButton";
 import { FileCard } from "./file-card";
+import { DataTable } from "./file-table";
+import { columns } from "./columns";
 
 function Placeholder({
   favorites,
@@ -61,6 +63,13 @@ export function FilesBrowser({
 
   const isLoading = files === undefined;
 
+  const modifiedFiles = files?.map(file => ({
+    ...file,
+    isFavorited: (favoritesFiles ?? []).some(
+      (favorite) => favorite.fileId === file._id
+    )
+  })) ?? [];
+
   return (
     <div className="w-full">
         {isLoading && (
@@ -84,10 +93,12 @@ export function FilesBrowser({
                 <Placeholder favorites={favorites} deletedOnly={deletedOnly}/>
               )}
 
+              <DataTable columns={columns} data={modifiedFiles}/>
+
               <div>
                 <div className="grid grid-cols-4 gap-4">
-                  {files?.map((file) => {
-                    return <FileCard key={file._id} file={file} favorites={favoritesFiles ?? []}/>
+                  {modifiedFiles?.map((file) => {
+                    return <FileCard key={file._id} file={file} />
                   })}
                 </div>
               </div>
