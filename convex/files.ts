@@ -96,6 +96,7 @@ export const getFiles = query({
         query: v.optional(v.string()),
         favorites: v.optional(v.boolean()),
         deletedOnly: v.optional(v.boolean()),
+        type: v.optional((fileTypes)),
     },
     async handler(ctx, args){
         const access = await hasAccessToOrg(
@@ -135,6 +136,10 @@ export const getFiles = query({
 
         if(query){
             files = files.filter((file) => file.name.includes(query))  
+        }
+
+        if(args.type){
+            files = files.filter((file) => file.type === args.type);
         }
 
         return files 

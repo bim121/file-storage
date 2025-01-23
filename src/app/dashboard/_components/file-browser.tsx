@@ -2,7 +2,7 @@
 import {  useOrganization, useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";;
 import Image from "next/image";
-import { Loader2} from "lucide-react";
+import { GridIcon, Loader2, RowsIcon, TableIcon} from "lucide-react";
 import { useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { SearchBar } from "@/app/dashboard/_components/search-bar";
@@ -10,6 +10,9 @@ import { UploadButton } from "./UploadButton";
 import { FileCard } from "./file-card";
 import { DataTable } from "./file-table";
 import { columns } from "./columns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Doc } from "../../../../convex/_generated/dataModel";
 
 function Placeholder({
   favorites,
@@ -44,6 +47,7 @@ export function FilesBrowser({
   const organization = useOrganization();
   const user = useUser();
   const [query, setQuery] = useState("");
+  const [type, setType] = useState<Doc<"files">["type"] | "all">('all');
 
   let orgId: string | undefined = undefined;
   
@@ -58,7 +62,7 @@ export function FilesBrowser({
 
   const files = useQuery(
     api.files.getFiles, 
-    orgId ? {orgId, query, favorites, deletedOnly} : "skip"
+    orgId ? {orgId, type: type === 'all' ? undefined : type, query, favorites, deletedOnly} : "skip"
   );
 
   const isLoading = files === undefined;
@@ -72,38 +76,71 @@ export function FilesBrowser({
 
   return (
     <div className="w-full">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold">{title}</h1>
+
+        <SearchBar query={query} setQuery={setQuery}/>
+
+        <UploadButton />
+      </div>
+
+      <Tabs
+        defaultValue="grid" 
+      >
+        <div className="flex justify-between items-center">
+          <TabsList className="mb-4">
+            <TabsTrigger value="grid" className="flex gap-2 items-center">
+              <GridIcon />
+              Grid
+            </TabsTrigger>
+            <TabsTrigger value="table" className="flex gap-2 items-center">
+              <RowsIcon />
+              Table
+            </TabsTrigger>
+          </TabsList>
+
+          <div>
+            <Select
+              value={type}
+              onValueChange={(newType) => {
+                setType(newType as any)
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="image">Image</SelectItem>
+                <SelectItem value="csv">CSV</SelectItem>
+                <SelectItem value="pdf">PDF</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {isLoading && (
-            <div className="flex flex-col gap-8 w-full items-center mt-24">
-              <Loader2 className="h-32 w-32 animate-spin text-gray-500"></Loader2>
-              <div className="text-2xl">Loading...</div>
-            </div>
+          <div className="flex flex-col gap-8 w-full items-center mt-24">
+            <Loader2 className="h-32 w-32 animate-spin text-gray-500"></Loader2>
+            <div className="text-2xl">Loading your files...</div>
+          </div>
         )}
 
-        {!isLoading && (
-            <>
-              <div className="flex justify-between items-center mb-8">
-                <h1 className="text-4xl font-bold">{title}</h1>
+        <TabsContent value="grid">
+          <div className="grid grid-cols-4 gap-4">
+            {modifiedFiles?.map((file) => {
+              return <FileCard key={file._id} file={file} />
+            })}
+          </div>
+        </TabsContent>
+        <TabsContent value="table">
+          <DataTable columns={columns} data={modifiedFiles}/>
+        </TabsContent>
+      </Tabs>
 
-                <SearchBar query={query} setQuery={setQuery}/>
-
-                <UploadButton />
-              </div>
-
-              {files.length === 0 && (
-                <Placeholder favorites={favorites} deletedOnly={deletedOnly}/>
-              )}
-
-              <DataTable columns={columns} data={modifiedFiles}/>
-
-              <div>
-                <div className="grid grid-cols-4 gap-4">
-                  {modifiedFiles?.map((file) => {
-                    return <FileCard key={file._id} file={file} />
-                  })}
-                </div>
-              </div>
-            </>
-        )}
+      {files?.length === 0 && (
+        <Placeholder favorites={favorites} deletedOnly={deletedOnly}/>
+      )}
     </div>
   );
 }
