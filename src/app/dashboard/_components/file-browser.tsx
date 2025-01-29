@@ -13,6 +13,7 @@ import { columns } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Doc } from "../../../../convex/_generated/dataModel";
+import { Label } from "@/components/ui/label";
 
 function Placeholder({
   favorites,
@@ -99,14 +100,15 @@ export function FilesBrowser({
             </TabsTrigger>
           </TabsList>
 
-          <div>
+          <div className="flex gap-2 items-center">
+            <Label htmlFor="type-select">Type Filter</Label>
             <Select
               value={type}
               onValueChange={(newType) => {
                 setType(newType as any)
               }}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger id="type-select" className="w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

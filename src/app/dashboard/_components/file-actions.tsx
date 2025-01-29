@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FileIcon, MoreVertical, StarHalf, StarIcon, TrashIcon, UndoIcon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { Doc } from '../../../../convex/_generated/dataModel';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '../../../../convex/_generated/api';
@@ -22,6 +22,7 @@ export default function FileCardActions({
     const { toast } = useToast();
 
     const getFileUrl = useMutation(api.files.getUrl);
+    const me = useQuery(api.users.getMe);
     const [src, setSrc] = useState<string| null>(null);
 
     useEffect(() => {
@@ -95,7 +96,11 @@ export default function FileCardActions({
                     </DropdownMenuItem>
 
                     <Protect
-                        role="org:admin"
+                        condition={(check) => {
+                            return check({
+                                role: "org:admin"
+                            }) || file.userId === me?._id;
+                        }}
                         fallback={<></>}
                     >
                         <DropdownMenuSeparator />

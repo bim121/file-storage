@@ -2,7 +2,7 @@ import {internalMutation, mutation, MutationCtx, query, QueryCtx} from './_gener
 import {ConvexError, v} from 'convex/values'
 import { getUser } from './users';
 import { fileTypes } from './schema';
-import { Id } from './_generated/dataModel';
+import { Doc, Id } from './_generated/dataModel';
 
 export const generateUploadUrl = mutation(async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -169,17 +169,11 @@ export const deleteFile = mutation({
             throw new ConvexError('no access to file');
         }
 
-        const isAdmin = 
-            access.user.orgIds.find((org) => org.orgId === access.file.orgId) 
-            ?.role === 'admin';
+        canDeleteFile(access.user, access.file);
 
-        if(!isAdmin){
-            throw new ConvexError("you have no admin access to delete");
-        }
-
-       await ctx.db.patch(args.fileId, {
-            shouldDelete: true
-       })
+        await ctx.db.patch(args.fileId, {
+                shouldDelete: true
+        })
     }
 })
 
@@ -192,17 +186,11 @@ export const restoreFile = mutation({
             throw new ConvexError('no access to file');
         }
 
-        const isAdmin = 
-            access.user.orgIds.find((org) => org.orgId === access.file.orgId) 
-            ?.role === 'admin';
+        canDeleteFile(access.user, access.file);
 
-        if(!isAdmin){
-            throw new ConvexError("you have no admin access to delete");
-        }
-
-       await ctx.db.patch(args.fileId, {
-            shouldDelete: false
-       })
+        await ctx.db.patch(args.fileId, {
+                shouldDelete: false
+        })
     }
 })
 
@@ -269,4 +257,15 @@ async function hasAccessToFile(ctx: QueryCtx | MutationCtx, fileId: Id<"files">)
     }
 
     return {user: hasAccess.user, file}
+}
+
+function canDeleteFile(user: Doc<"users">, file: Doc<"files">){
+    const canDelete = 
+            file.userId === user._id ||
+            user.orgIds.find((org) => org.orgId === file.orgId) 
+            ?.role === 'admin';
+    
+    if(!canDelete){
+        throw new ConvexError("you have no access to delete this file");
+    }
 }
