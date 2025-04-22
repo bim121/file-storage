@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { api } from '../../../../convex/_generated/api';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Protect } from '@clerk/nextjs';
+import Link from 'next/link';
 
 export default function FileCardActions({ 
     file, 
@@ -94,6 +95,12 @@ export default function FileCardActions({
                     >
                         <FileIcon /> Download
                     </DropdownMenuItem>
+                    <Link href={`/editor/${file.fileId}`}>
+                        <DropdownMenuItem className="flex gap-1 items-center cursor-pointer">
+                            Open
+                        </DropdownMenuItem>
+                    </Link>
+
 
                     <Protect
                         condition={(check) => {

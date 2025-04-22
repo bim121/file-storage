@@ -1,8 +1,9 @@
-import {internalMutation, mutation, MutationCtx, query, QueryCtx} from './_generated/server'
+import {action, internalMutation, mutation, MutationCtx, query, QueryCtx} from './_generated/server'
 import {ConvexError, v} from 'convex/values'
 import { getUser } from './users';
 import { fileTypes } from './schema';
 import { Doc, Id } from './_generated/dataModel';
+import { api } from './_generated/api';
 
 export const generateUploadUrl = mutation(async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -146,6 +147,37 @@ export const getFiles = query({
     }
 })
 
+export const getFileById = query({
+    args: {
+        orgId: v.string(),
+        fileId: v.string(), 
+    },
+    async handler(ctx, args) {
+        const access = await hasAccessToOrg(
+            ctx,
+            args.orgId,
+        );
+
+        if (!access) {
+            throw [];
+        }
+
+        let files = await ctx.db.
+            query("files")
+            .withIndex("by_orgId", (q) => q.eq("orgId", args.orgId))
+            .collect();
+
+        const file = files.find((f) => f._id === args.fileId);
+
+        if (!file) {
+            throw new Error('Файл не найден');
+        }
+
+        return file;
+    }
+});
+
+
 export const deletedAllFiles = internalMutation({
     args: {},
     async handler(ctx){
@@ -269,3 +301,46 @@ function canDeleteFile(user: Doc<"users">, file: Doc<"files">){
         throw new ConvexError("you have no access to delete this file");
     }
 }
+
+export const getFileMeta = query({
+    args: {
+      fileId: v.id('files'),
+    },
+    handler: async (ctx, { fileId }) => {
+      return await ctx.db.get(fileId);
+    },
+});
+
+
+export const updateFileStorageId = mutation({
+    args: {
+      fileId: v.id('files'),
+      newFileId: v.id('_storage'),
+    },
+    handler: async (ctx, { fileId, newFileId }) => {
+      await ctx.db.patch(fileId, {
+        fileId: newFileId,
+      });
+    },
+});
+
+  
+export const saveDocxFile = action({
+    args: {
+      fileId: v.id('files'),
+      buffer: v.array(v.number()),
+    },
+    handler: async (ctx, { fileId, buffer }) => {
+      const file = await ctx.runQuery(api.files.getFileMeta, { fileId });
+      if (!file) throw new ConvexError('Файл не найден');
+  
+      const arrayBuffer = new Uint8Array(buffer).buffer;
+      const blob = new Blob([arrayBuffer]);
+      const newFileId = await ctx.storage.store(blob);
+  
+      await ctx.runMutation(api.files.updateFileStorageId, {
+        fileId,
+        newFileId,
+      });
+    },
+});
