@@ -116,6 +116,7 @@ export function FilesBrowser({
                 <SelectItem value="image">Image</SelectItem>
                 <SelectItem value="csv">CSV</SelectItem>
                 <SelectItem value="pdf">PDF</SelectItem>
+                <SelectItem value="docx">Docx</SelectItem>
               </SelectContent>
             </Select>
           </div>

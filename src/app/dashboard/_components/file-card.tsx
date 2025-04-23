@@ -1,8 +1,8 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import { FileTextIcon, GanttChartIcon, ImageIcon } from 'lucide-react';
+import { FileIcon, FileTextIcon, GanttChartIcon, ImageIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'convex/react';
 import Image from 'next/image';
-import { Doc, Id } from '../../../../convex/_generated/dataModel';
+import { Doc } from '../../../../convex/_generated/dataModel';
 import { api } from '../../../../convex/_generated/api';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -17,6 +17,7 @@ export function FileCard({
     const typeIcons = {
         "image": <ImageIcon />,
         "pdf": <FileTextIcon />,
+        "docx": <FileTextIcon />,
         "csv": <GanttChartIcon />
     } as Record<Doc<"files">["type"], ReactNode>;
 
@@ -57,6 +58,10 @@ export function FileCard({
 
                 {file.type === "pdf" && (
                     <FileTextIcon className='w-20 h-20'/>
+                )}
+
+                {file.type === "docx" && (
+                   <FileIcon className='w-40 h-40'/>
                 )}
             </CardContent>
             <CardFooter className='flex justify-between items-center'>  
