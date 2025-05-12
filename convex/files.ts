@@ -310,36 +310,38 @@ export const getFileMeta = query({
     },
 });
 
+export const saveFile = mutation({
+    args: { fileId: v.id('files') },
+    async handler(ctx, args){
+        const access = await hasAccessToFile(ctx, args.fileId);
 
-export const updateFileStorageId = mutation({
-    args: {
-      fileId: v.id('files'),
-      newFileId: v.id('_storage'),
-    },
-    handler: async (ctx, { fileId, newFileId }) => {
-      await ctx.db.patch(fileId, {
-        fileId: newFileId,
-      });
-    },
-});
+        if(!access){
+            throw new ConvexError('no access to file');
+        }
 
-  
-export const saveDocxFile = action({
-    args: {
-      fileId: v.id('files'),
-      buffer: v.array(v.number()),
-    },
-    handler: async (ctx, { fileId, buffer }) => {
-      const file = await ctx.runQuery(api.files.getFileMeta, { fileId });
-      if (!file) throw new ConvexError('Файл не найден');
-  
-      const arrayBuffer = new Uint8Array(buffer).buffer;
-      const blob = new Blob([arrayBuffer]);
-      const newFileId = await ctx.storage.store(blob);
-  
-      await ctx.runMutation(api.files.updateFileStorageId, {
-        fileId,
-        newFileId,
-      });
-    },
+        await ctx.db.patch(args.fileId, {
+            shouldDelete: true
+        })
+    }
+})
+
+export const updateFileContent = mutation({
+  args: {
+    fileId: v.id("_storage"),
+    newStorageId: v.id("_storage"),
+  },
+  async handler(ctx, args) {
+    const file = await ctx.db
+      .query("files")
+      .withIndex("by_fileId", (q) => q.eq("fileId", args.fileId))
+      .first();
+
+    if (!file) {
+      throw new ConvexError("File not found");
+    }
+
+    await ctx.db.patch(file._id, {
+      fileId: args.newStorageId,
+    });
+  },
 });

@@ -2,18 +2,18 @@
 
 import { useQuery } from 'convex/react';
 import { useOrganization, useUser } from '@clerk/nextjs';
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { Doc } from '../../../../convex/_generated/dataModel';
 import { api } from '../../../../convex/_generated/api';
 import WordEditor from '@/app/dashboard/_components/word-editor';
 
 interface Props {
-  params: { fileId: string };
+  params: Promise<{ fileId: string }>;
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export default function EditorPage({ params }: Props) {
-  const { fileId } = params;
+ const { fileId } = use(params);
 
   const organization = useOrganization();
   const user = useUser();
